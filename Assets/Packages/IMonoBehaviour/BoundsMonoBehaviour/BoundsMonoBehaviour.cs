@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-public class TransformBoundsMonoBehaviour : BoundsMonoBehaviour, ITransformMonoBehaviour
+[ExecuteInEditMode]
+public class BoundsMonoBehaviour : TransformMonoBehaviour, IBoundsMonoBehaviour
 {
     // NOTE:
     // Some of these are implemented to fast calculation.
@@ -21,11 +22,15 @@ public class TransformBoundsMonoBehaviour : BoundsMonoBehaviour, ITransformMonoB
     #region Class
 
     [System.Serializable]
-    public class BoundsUpdateEvent : UnityEvent<Bounds> { }
+    public class BoundsUpdateEvent : UnityEvent<BoundsMonoBehaviour> { }
 
     #endregion Class
 
     #region Field
+
+    public bool gizmo = true;
+
+    public Color gizmoColor = Color.white;
 
     public bool isStatic;
 
@@ -35,44 +40,13 @@ public class TransformBoundsMonoBehaviour : BoundsMonoBehaviour, ITransformMonoB
 
     #region Property
 
-    public new Transform transform
-    {
-        get;
-        protected set;
-    }
-
-    public override Bounds Bounds
-    {
-        get;
-        protected set;
-    }
-
-    public virtual Vector3 Min
-    {
-        get;
-        protected set;
-    }
-
-    public virtual Vector3 Max
-    {
-        get;
-        protected set;
-    }
-
-    public bool IsInitialized
-    {
-        get;
-        protected set;
-    }
+    public virtual Bounds  Bounds { get; protected set; }
+    public virtual Vector3 Min    { get; protected set; }
+    public virtual Vector3 Max    { get; protected set; }
 
     #endregion Property
 
     #region Method
-
-    protected virtual void Awake()
-    {
-        Initialize();
-    }
 
     protected virtual void Update()
     {
@@ -84,9 +58,22 @@ public class TransformBoundsMonoBehaviour : BoundsMonoBehaviour, ITransformMonoB
         UpdateBounds();
     }
 
-    public virtual bool Initialize()
+    protected virtual void OnDrawGizmos()
     {
-        if (this.IsInitialized)
+        if (!this.gizmo)
+        {
+            return;
+        }
+
+        Color previousColor = Gizmos.color;
+        Gizmos.color = this.gizmoColor;
+        Gizmos.DrawWireCube(this.Bounds.center, this.Bounds.size);
+        Gizmos.color = previousColor;
+    }
+
+    public override bool Initialize()
+    {
+        if (!base.Initialize())
         {
             return false;
         }
@@ -96,37 +83,29 @@ public class TransformBoundsMonoBehaviour : BoundsMonoBehaviour, ITransformMonoB
             this.boundsUpdateEvent = new BoundsUpdateEvent();
         }
 
-        this.transform = base.transform;
-
         UpdateBounds();
-
-        this.IsInitialized = true;
 
         return true;
     }
 
     public virtual void UpdateBounds()
     {
+        if (!base.IsInitialized)
+        {
+            Initialize();
+            return;
+        }
+
         Bounds previousBounds = this.Bounds;
 
         this.Bounds = new Bounds(this.transform.position, this.transform.localScale);
-        this.Min = this.Bounds.min;
-        this.Max = this.Bounds.max;
+        this.Min    = this.Bounds.min;
+        this.Max    = this.Bounds.max;
 
         if (previousBounds != this.Bounds)
         {
-            this.boundsUpdateEvent.Invoke(this.Bounds);
+            this.boundsUpdateEvent.Invoke(this);
         }
-    }
-
-    public Vector3 GetRandomPoint()
-    {
-        return new Vector3()
-        {
-            x = Random.Range(this.Min.x, this.Max.x),
-            y = Random.Range(this.Min.y, this.Max.y),
-            z = Random.Range(this.Min.z, this.Max.z),
-        };
     }
 
     public bool Contains(Vector3 point)
@@ -135,7 +114,7 @@ public class TransformBoundsMonoBehaviour : BoundsMonoBehaviour, ITransformMonoB
               || this.Max.x < point.x || this.Max.y < point.y || this.Max.z < point.z);
     }
 
-    public bool Intersects(TransformBoundsMonoBehaviour bounds)
+    public bool Intersects(BoundsMonoBehaviour bounds)
     {
         return Intersects(bounds.Min, bounds.Max);
     }

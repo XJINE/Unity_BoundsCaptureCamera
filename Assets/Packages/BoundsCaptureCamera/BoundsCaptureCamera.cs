@@ -6,11 +6,11 @@ public class BoundsCaptureCamera : TransformMonoBehaviour
 {
     // NOTE:
     // If you want to call UpdateCaptureArea() when bounds update,
-    // register UpdateCaptureArea() to TransformBoundsMonoBehaviour.boundsUpdateEvent in Inspector.
+    // register UpdateCaptureArea() to BoundsMonoBehaviour.boundsUpdateEvent in Inspector.
 
     #region Field
 
-    public TransformBoundsMonoBehaviour[] bounds;
+    public BoundsMonoBehaviour[] bounds;
 
     public Vector4 margin;
 
@@ -41,15 +41,15 @@ public class BoundsCaptureCamera : TransformMonoBehaviour
         this.prevMargin = this.margin;
 
         // CAUTION:
-        // UpdateCaptureArea() may called from outside before Awake() called.
-        // For example, called from TransformBoundsMonoBehaviour.BoundsUpdateEvent.
-        // To avoid NullReferenceException, keep camera instance in here.
+        // UpdateCaptureArea() may called from outside before this.Awake() called.
+        // For example, BoundsMonoBehaviour.BoundsUpdateEvent sometimes call it.
+        // To avoid NullReferenceException, keep camera reference in here.
 
         this.camera = base.GetComponent<Camera>();
 
         // CAUTION:
-        // TransformBoundsMonoBehaviour is initialized in Awake().
-        // So need to manually initialize to avoid a problem with execute order.
+        // BoundsMonoBehaviour will be initialized in Awake().
+        // So need to manually initialize to avoid a NullReferenceException when a scene starts.
 
         foreach (var bounds in this.bounds) 
         {
@@ -99,7 +99,7 @@ public class BoundsCaptureCamera : TransformMonoBehaviour
                                               base.transform.position.z);
 
         // WARNING:
-        // Need to do following setup. If not, output image are not show in fullscreen.
+        // Need to do following setup. If not, output image will not show in fullscreen.
 
         if (this.camera.rect.width < 1 || this.camera.rect.height < 1)
         {
