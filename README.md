@@ -14,10 +14,10 @@ You can import this asset from UnityPackage.
 
 You have to import following assets to use this asset.
 
-- [Unity_IMonoBehaviour](https://github.com/XJINE/Unity_IMonoBehaviour)
+- [Unity_BoundsMonoBehaviour](https://github.com/XJINE/Unity_BoundsMonoBehaviour)
 
 ## How to Use
 
-Add ``BoundsCaptureCamera.cs`` to camera object and set Bounds which inherit ``TransformBoundsMonoBehaviour.cs`` in Inspector.
+Add ``BoundsCaptureCamera.cs`` to camera and set some Bounds which inherit ``BoundsMonoBehaviour.cs`` in Inspector.
 
-If you want to auto update when Bounds update, set ``BoundsCaptureCamera.UpdateCaptureArea()`` to ``TransformBoundsMonoBehaviour.BoundsUpdateEvent``.
+And, set ``BoundsCaptureCamera.UpdateCaptureArea()`` method to ``BoundsMonoBehaviour.BoundsUpdateEvent`` if you need.
